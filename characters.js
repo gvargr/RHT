@@ -36,7 +36,7 @@ window.CATEGORIES = {
       ["lois","Lois Griffin","Family Guy","West"],
       ["ginger-f","Ginger Foutley","As Told by Ginger","West"],
       ["anastasia","Anastasia","Anastasia","West"],
-      ["chuckie","Chuckie Finster","Rugrats","West"],
+      ["april","April O'Neil","Teenage Mutant Ninja Turtles","West"],
       ["asuka","Asuka Langley Soryu","Neon Genesis Evangelion","East"],
       ["misty","Misty","Pokémon","East"],
       ["erza","Erza Scarlet","Fairy Tail","East"],
