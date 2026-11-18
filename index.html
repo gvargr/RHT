@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hair Colour Tier Vote</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#160c0b; --panel:#22120f; --panel2:#2c1814; --line:#43251e;
+    --ink:#f7e9e2; --mute:#bf9b8e; --accent:#ff5a36; --accent2:#ffb347;
+    --S:#ff4b3e; --A:#ff8a3d; --B:#ffc94a; --C:#9fd36b; --D:#6fb6d9;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#3a1510 0%,transparent 60%),var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;min-height:100vh}
+  .wrap{max-width:1040px;margin:0 auto;padding:28px 18px 60px}
+  h1,h2,h3{font-family:"Bricolage Grotesque",Inter,sans-serif;margin:0}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:800;letter-spacing:-.02em;line-height:1.05}
+  h1 span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--mute);margin:8px 0 22px;max-width:660px}
+  .tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+  .tab{background:var(--panel);border:1px solid var(--line);color:var(--mute);padding:8px 14px;border-radius:999px;cursor:pointer;font:600 14px Inter}
+  .tab.on{background:var(--accent);border-color:var(--accent);color:#1a0905}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .progress{height:8px;background:var(--panel2);border-radius:99px;overflow:hidden;margin:12px 0 18px}
+  .progress i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s}
+  .muted{color:var(--mute)}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  @media (max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}}
+  .pick{position:relative;background:var(--panel2);border:2px solid var(--line);border-radius:14px;padding:10px 10px 14px;text-align:center;cursor:pointer;transition:transform .12s,border-color .12s;user-select:none}
+  .pick:hover{transform:translateY(-2px);border-color:#6b3a2e}
+  .pick.ranked{border-color:var(--accent)}
+  .pick .badge{position:absolute;top:16px;right:16px;z-index:2;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#1a0905;font:800 16px "Bricolage Grotesque";display:none;align-items:center;justify-content:center;box-shadow:0 2px 6px #0008}
+  .pick.ranked .badge{display:flex}
+
+  /* Thumbnail slot: square, image covers it; placeholder shows until an image loads */
+  .thumb{position:relative;width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;margin-bottom:10px;background:var(--panel)}
+  .thumb .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:800 30px "Bricolage Grotesque";color:#fff;text-shadow:0 1px 3px #0007}
+  .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}
+  .thumb img.ok{opacity:1}
+  .thumb.sm{width:40px;height:40px;flex:none;margin:0;border-radius:8px}
+  .thumb.sm .ph{font-size:14px}
+
+  .nm{font-weight:600;line-height:1.25}
+  .sr{font-size:12.5px;color:var(--mute);margin-top:3px}
+  .org{display:inline-block;margin-top:8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--mute)}
+  .btns{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  button.b{font:600 14px Inter;border-radius:10px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--ink)}
+  button.b.pri{background:var(--accent);border-color:var(--accent);color:#1a0905}
+  button.b:disabled{opacity:.4;cursor:default}
+  .tier{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:8px;background:var(--panel)}
+  .tier .lbl{width:64px;flex:none;display:flex;align-items:center;justify-content:center;font:800 26px "Bricolage Grotesque";color:#1a0905}
+  .tier .items{display:flex;flex-wrap:wrap;gap:8px;padding:10px;flex:1;min-height:70px;align-items:center}
+  .chip{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:5px 10px 5px 5px}
+  .chip .nm{font-size:13.5px}
+  .chip .sc{font-size:11.5px;color:var(--mute)}
+  .empty{color:var(--mute);font-size:13px;padding:0 4px}
+  .note{font-size:13px;color:var(--mute);margin-top:14px}
+  .status{font-size:12.5px;color:var(--mute)}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#777;margin-right:6px;vertical-align:1px}
+  .dot.live{background:#6fdc8c}
+  .cats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media (max-width:760px){.cats{grid-template-columns:1fr 1fr}}
+  @media (max-width:460px){.cats{grid-template-columns:1fr}}
+  .cat{display:block;text-decoration:none;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;transition:transform .12s,border-color .12s}
+  .cat:hover{transform:translateY(-2px);border-color:#6b3a2e}
+  .cat .sw{height:64px;border-radius:10px;margin-bottom:12px;display:flex;overflow:hidden}
+  .cat .sw i{flex:1}
+  .cat h3{font-size:20px}
+  .cat .meta{font-size:12.5px;color:var(--mute);margin-top:6px}
+  .back{color:var(--mute);text-decoration:none;font-size:14px;display:inline-block;margin-bottom:10px}
+  .back:hover{color:var(--ink)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:14px}
+  td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+  th{color:var(--mute);font-weight:500}
+  td.n{text-align:right;font-variant-numeric:tabular-nums}
+</style>
+<script src="config.js"></script>
+<script src="characters.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" id="back" href="#" hidden>&larr; All categories</a>
+  <div class="row" style="align-items:flex-end">
+    <div>
+      <h1 id="h1"></h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+  <div class="tabs" id="tabs" hidden>
+    <button class="tab on" data-v="vote">Vote</button>
+    <button class="tab" data-v="mine">My tier list</button>
+    <button class="tab" data-v="all">Everyone's tier list</button>
+  </div>
+  <div id="view"></div>
+</div>
+
+<script>
+const CFG = window.TIER_CONFIG || {};
+const CATS = window.CATEGORIES || {};
+const OVR = window.IMG_OVERRIDES || {};
+const PER_POLL = 5, APPEAR = 3, MAXPTS = PER_POLL - 1;   // 1st = 4 pts ... 5th = 0 pts
+const TIERS = [["S",3.2],["A",2.4],["B",1.6],["C",0.8],["D",-1]];
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a }
+function uuid(){ return (crypto.randomUUID ? crypto.randomUUID() : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==="x"?r:(r&3|8)).toString(16)})) }
+function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)) }catch(e){ return null } }
+function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)) }catch(e){} }
+
+// One anonymous voter id per browser, shared across categories
+let VOTER = lsGet("tier-voter-id"); if(!VOTER){ VOTER=uuid(); lsSet("tier-voter-id",VOTER) }
+
+// ---------- shared results (Supabase, optional) ----------
+let sb=null;
+if(CFG.supabaseUrl && CFG.supabaseAnonKey && window.supabase){ try{ sb=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey) }catch(e){ sb=null } }
+
+// ---------- per-category state ----------
+let cat=null, C=null, CHARS=[], BY={}, POLLS=0, S=null, everyone=[], live=false, view="vote";
+function hueFor(i,n){ const p=C.ph; return p.spread>=360 ? (i*137.5)%360 : p.base + ((i*29)%(p.spread+1)) - p.spread/2 }
+function openCat(slug){
+  cat=slug; C=CATS[slug];
+  CHARS=C.chars.map(([id,name,series,origin],i)=>({id,name,series,origin,i}));
+  BY=Object.fromEntries(CHARS.map(c=>[c.id,c]));
+  POLLS=CHARS.length*APPEAR/PER_POLL;
+  const key="tier-"+slug, roster=CHARS.map(c=>c.id).join(",");
+  S=lsGet(key); if(!S || S.roster!==roster) S=fresh(roster);
+  everyone=[]; live=false; view="vote";
+  document.documentElement.style.setProperty("--accent",C.accent[0]);
+  document.documentElement.style.setProperty("--accent2",C.accent[1]);
+  render(); fetchAll();
+}
+function fresh(roster){ return {roster: roster||CHARS.map(c=>c.id).join(","), polls:makeSchedule(), idx:0, points:{}, order:[], submitted:false} }
+function save(){ lsSet("tier-"+cat,S) }
+function makeSchedule(){
+  // 3 shuffled passes of the roster, each split into groups of 5:
+  // every character appears exactly 3 times and never twice in one poll.
+  const polls=[];
+  for(let p=0;p<APPEAR;p++){ const order=shuffle(CHARS.map(c=>c.id)); for(let i=0;i<order.length;i+=PER_POLL) polls.push(order.slice(i,i+PER_POLL)); }
+  return shuffle(polls);
+}
+
+function setStatus(){
+  const el=document.getElementById("status");
+  if(!cat){ el.innerHTML=""; return }
+  if(!sb){ el.innerHTML=`<span class="dot"></span>Local mode: results stay on this device`; return }
+  el.innerHTML = live ? `<span class="dot live"></span>Live: ${everyone.length} voter${everyone.length===1?"":"s"}` : `<span class="dot"></span>Shared results unavailable`;
+}
+async function fetchAll(){
+  if(!sb || !cat) return setStatus();
+  const want=cat;
+  const {data,error}=await sb.from("votes").select("points").eq("category",want);
+  if(want!==cat) return;
+  if(error){ live=false; console.log(error) } else { everyone=(data||[]).filter(r=>r&&r.points); live=true }
+  setStatus(); if(view==="all") render();
+}
+async function submit(){
+  S.submitted=true; save();
+  if(!sb) return;
+  const {error}=await sb.from("votes").upsert({voter_id:VOTER, category:cat, points:S.points, updated_at:new Date().toISOString()},{onConflict:"voter_id,category"});
+  if(error) console.log(error);
+  fetchAll();
+}
+
+// ---------- scoring ----------
+function tierList(pointMaps){
+  const tot={}, cnt={};
+  for(const pm of pointMaps) for(const [id,v] of Object.entries(pm||{})){
+    if(!BY[id] || typeof v!=="number" || v<0 || v>MAXPTS*APPEAR) continue;
+    tot[id]=(tot[id]||0)+v; cnt[id]=(cnt[id]||0)+1;
+  }
+  const scored=CHARS.filter(c=>cnt[c.id]).map(c=>({c, avg:tot[c.id]/(cnt[c.id]*APPEAR)}));
+  scored.sort((a,b)=>b.avg-a.avg);
+  const out=TIERS.map(([t])=>({t,items:[]}));
+  for(const s of scored){ out[TIERS.findIndex(([,min])=>s.avg>=min)].items.push(s) }
+  return {tiers:out, scored};
+}
+
+// ---------- rendering ----------
+const $view=document.getElementById("view");
+function thumb(c,small){
+  const ini=c.name.replace(/[^A-Za-z ]/g,"").split(" ").filter(Boolean).map(w=>w[0]).slice(0,2).join("");
+  const src=OVR[cat+"/"+c.id] || `thumbs/${cat}/${c.id}.${CFG.thumbExt||"webp"}`;
+  const h=hueFor(c.i), p=C.ph;
+  return `<div class="thumb ${small?"sm":""}">
+    <div class="ph" style="color:${p.ink};background:linear-gradient(140deg,hsl(${h+10} ${p.sat}% ${p.light+10}%),hsl(${h} ${p.sat}% ${p.light-12}%))">${ini}</div>
+    <img src="${esc(src)}" alt="${esc(c.name)}" loading="lazy" onload="this.classList.add('ok')" onerror="this.remove()">
+  </div>`;
+}
+function renderHome(){
+  document.getElementById("h1").innerHTML=`Hair Colour <span>Tier Vote</span>`;
+  document.getElementById("sub").textContent="Pick a category. Each one has 50 characters from Western and Eastern animation, ranked five at a time.";
+  document.getElementById("tabs").hidden=true; document.getElementById("back").hidden=true;
+  document.documentElement.style.setProperty("--accent","#ff5a36"); document.documentElement.style.setProperty("--accent2","#ffb347");
+  $view.innerHTML=`<div class="cats">${Object.entries(CATS).map(([slug,c])=>{
+    const p=c.ph, sw=[0,1,2,3,4,5].map(i=>{const h=p.spread>=360?(i*60):p.base+(i-2.5)*p.spread/6;return `<i style="background:hsl(${h} ${p.sat}% ${p.light+(i%2?6:-4)}%)"></i>`}).join("");
+    const st=lsGet("tier-"+slug), done=st&&st.idx>=st.polls.length, prog=st&&!done&&st.idx>0?` &middot; ${st.idx}/${st.polls.length} polls done`:done?" &middot; voted":"";
+    return `<a class="cat" href="#${slug}"><div class="sw">${sw}</div><h3>${esc(c.title)}</h3><div class="muted">${esc(c.blurb)}</div><div class="meta">${c.chars.length} characters${prog}</div></a>`}).join("")}</div>`;
+  setStatus();
+}
+function renderVote(){
+  if(S.idx>=S.polls.length){
+    $view.innerHTML=`<div class="card"><h2>All ${S.polls.length} polls done</h2>
+      <p class="muted">Your ranking ${sb?"has been added to the shared results.":"is saved on this device."}</p>
+      <div class="btns"><button class="b pri" data-go="mine">See my tier list</button><button class="b" data-go="all">See everyone's</button><button class="b" id="again">Vote again (replaces my ballot)</button><a class="b" href="#" style="text-decoration:none;display:inline-block">Try another category</a></div></div>`;
+    document.getElementById("again").onclick=()=>{ S=fresh(); save(); render() };
+    return;
+  }
+  const poll=S.polls[S.idx], pct=Math.round(S.idx/S.polls.length*100);
+  $view.innerHTML=`<div class="card">
+    <div class="row"><h3>Poll ${S.idx+1} of ${S.polls.length}</h3><span class="muted">Tap from favourite to least favourite</span></div>
+    <div class="progress"><i style="width:${pct}%"></i></div>
+    <div class="grid">${poll.map(id=>{const c=BY[id], r=S.order.indexOf(id);
+      return `<div class="pick ${r>=0?"ranked":""}" data-id="${id}"><span class="badge">${r+1}</span>${thumb(c)}<div class="nm">${esc(c.name)}</div><div class="sr">${esc(c.series)}</div><span class="org">${c.origin}</span></div>`}).join("")}</div>
+    <div class="btns"><button class="b pri" id="next" ${S.order.length<PER_POLL?"disabled":""}>Lock in ranking</button><button class="b" id="reset" ${S.order.length?"":"disabled"}>Clear this poll</button></div>
+    <p class="note">1st gets 4 points, 2nd 3, 3rd 2, 4th 1, 5th 0. Each character's score is averaged over their ${APPEAR} polls.</p></div>`;
+  $view.querySelectorAll(".pick").forEach(el=>el.onclick=()=>{
+    const id=el.dataset.id, i=S.order.indexOf(id);
+    if(i>=0) S.order.splice(i); else S.order.push(id);
+    if(S.order.length===PER_POLL-1) S.order.push(poll.find(x=>!S.order.includes(x)));
+    save(); renderVote();
+  });
+  document.getElementById("reset").onclick=()=>{ S.order=[]; save(); renderVote() };
+  document.getElementById("next").onclick=async()=>{
+    S.order.forEach((id,i)=>{ S.points[id]=(S.points[id]||0)+(MAXPTS-i) });
+    S.order=[]; S.idx++; save();
+    if(S.idx>=S.polls.length) await submit();
+    render();
+  };
+}
+function renderTiers(pointMaps,title,extra){
+  const {tiers,scored}=tierList(pointMaps);
+  if(!scored.length){ $view.innerHTML=`<div class="card"><h3>${title}</h3><p class="muted">${extra||"No votes yet."}</p></div>`; return }
+  $view.innerHTML=`<div class="card"><div class="row" style="margin-bottom:14px"><h3>${title}</h3><span class="muted">${extra||""}</span></div>
+    ${tiers.map(t=>`<div class="tier"><div class="lbl" style="background:var(--${t.t})">${t.t}</div><div class="items">${t.items.length?t.items.map(s=>`<div class="chip">${thumb(s.c,true)}<div><div class="nm">${esc(s.c.name)}</div><div class="sc">${s.avg.toFixed(2)} avg</div></div></div>`).join(""):'<span class="empty">Nobody here</span>'}</div></div>`).join("")}
+    <details style="margin-top:14px"><summary class="muted" style="cursor:pointer">Full ranking</summary>
+    <table><tr><th>#</th><th>Character</th><th>Series</th><th class="n">Avg pts</th></tr>
+    ${scored.map((s,i)=>`<tr><td>${i+1}</td><td>${esc(s.c.name)}</td><td class="muted">${esc(s.c.series)}</td><td class="n">${s.avg.toFixed(2)}</td></tr>`).join("")}</table></details></div>`;
+}
+function render(){
+  if(!cat) return renderHome();
+  document.getElementById("h1").innerHTML=`${esc(C.title)} <span>Tier Vote</span>`;
+  document.getElementById("sub").textContent=`${CHARS.length} characters from Western and Eastern animation. You get ${POLLS} polls of ${PER_POLL}. Every character turns up in exactly ${APPEAR} polls, and your rankings build the tier list.`;
+  document.getElementById("tabs").hidden=false; document.getElementById("back").hidden=false;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.v===view));
+  if(view==="vote") renderVote();
+  else if(view==="mine") renderTiers([S.points],"My tier list", S.idx<S.polls.length?`In progress: ${S.idx}/${S.polls.length} polls`:"Complete");
+  else {
+    const maps = sb && live ? everyone.map(r=>r.points) : (S.submitted ? [S.points] : []);
+    renderTiers(maps,"Everyone's tier list", sb ? (live?`${everyone.length} completed ballot${everyone.length===1?"":"s"}`:"Could not reach shared results") : "Shared voting not set up, showing this device only");
+  }
+  $view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{view=b.dataset.go;render(); if(view==="all") fetchAll()});
+  setStatus();
+}
+function route(){
+  const h=decodeURIComponent(location.hash.slice(1));
+  if(CATS[h]) openCat(h); else { cat=null; render() }
+  window.scrollTo(0,0);
+}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{view=t.dataset.v;render(); if(view==="all") fetchAll()});
+setInterval(()=>{ if(cat && view==="all") fetchAll() }, 30000);
+window.addEventListener("hashchange",route);
+route();
+</script>
+</body>
+</html>
